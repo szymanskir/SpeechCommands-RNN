@@ -1,4 +1,4 @@
-.PHONY: clean lint requirements tests
+.PHONY: clean lint requirements tests data
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -25,6 +25,11 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	rm -rf .mypy_cache
 
+## Download kaggle dataset
+data: data/train.7z data/test.7z
+	7za x data/train.7z -odata/
+
+
 ## Lint using flake8 nad check types using mypy
 lint:
 	flake8 $(PROJECT_NAME)
@@ -42,6 +47,8 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 
+data/train.7z data/test/7z:
+	kaggle competitions download -c tensorflow-speech-recognition-challenge -p data/
 
 #################################################################################
 # Self Documenting Commands                                                     #
