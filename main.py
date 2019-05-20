@@ -1,6 +1,6 @@
 import logging
-import pickle
 from rnnhearer.data_manipulation import DataReader
+from rnnhearer.utils import write_pickle
 
 logging.basicConfig(
         level=logging.INFO,
@@ -9,4 +9,4 @@ logging.basicConfig(
     )
 data_reader = DataReader("data/train")
 data = data_reader.read()
-pickle.dump(data, "data/speech_commands.pkl")
+write_pickle(data, "data/speech_commands.pkl")
