@@ -1,4 +1,4 @@
-import librosa
+import scipy.io.wavfile as wavfile
 import logging
 import multiprocessing
 import numpy as np
@@ -65,7 +65,7 @@ class DataReader:
     def _create_single_record(
         self, audio_data_file: np.array, label: str
     ) -> Dict[np.array, str]:
-        audio_data, _ = librosa.load(audio_data_file)
+        _, audio_data = wavfile.read(audio_data_file)
         return {"audio_data": audio_data, "label": label}
 
     def _read_single_word_samples_dir(
