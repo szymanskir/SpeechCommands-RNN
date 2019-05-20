@@ -26,9 +26,10 @@ clean:
 	rm -rf .mypy_cache
 
 ## Download kaggle dataset
-data: data/train.7z data/test.7z
-	7za x data/train.7z -odata/
-
+data: data/speech_commands_v0.01.tar.gz 
+	mkdir data/train
+	mkdir data/train/audio
+	tar xf data/speech_commands_v0.01.tar.gz -C data/train/audio
 
 ## Lint using flake8 nad check types using mypy
 lint:
@@ -47,8 +48,8 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 
-data/train.7z data/test/7z:
-	kaggle competitions download -c tensorflow-speech-recognition-challenge -p data/
+data/speech_commands_v0.01.tar.gz:
+	wget http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz -P data/
 
 #################################################################################
 # Self Documenting Commands                                                     #

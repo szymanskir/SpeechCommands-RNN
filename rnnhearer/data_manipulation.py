@@ -71,9 +71,10 @@ class DataReader:
     def _read_single_word_samples_dir(
         self, word_samples_dir: str
     ) -> List[Dict[np.array, str]]:
-        _LOGGER.info(f'Reading samples from {word_samples_dir}...')
+        _LOGGER.info(f"Reading samples from {word_samples_dir}...")
         word_audio_samples = self._find_all_wav_files(
-            join(self._audio_source, word_samples_dir))
+            join(self._audio_source, word_samples_dir)
+        )
         label = basename(word_samples_dir)
         return [
             self._create_single_record(audio_data_file, label)
@@ -81,9 +82,16 @@ class DataReader:
         ]
 
     def read(self) -> List[Dict[np.array, str]]:
-        word_samples_dir = listdir(self._audio_source)
+        word_samples_dir = list(
+            filter(
+                lambda x: x in _SPEECH_COMMANDS_SAMPLES_DIRECTORIES,
+                listdir(self._audio_source),
+            )
+        )
         pool = multiprocessing.Pool()
-        return sum([], list(pool.map(self._read_single_word_samples_dir, word_samples_dir)))
+        return sum(
+            [], list(pool.map(self._read_single_word_samples_dir, word_samples_dir))
+        )
 
     @staticmethod
     def _find_all_wav_files(dir: str):
