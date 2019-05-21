@@ -2,9 +2,8 @@ import scipy.io.wavfile as wavfile
 import logging
 import multiprocessing
 import numpy as np
-from glob import glob
 from os import listdir
-from os.path import isdir, join, dirname, basename
+from os.path import isdir, join, basename
 from pathlib import Path
 from typing import Dict, List
 
