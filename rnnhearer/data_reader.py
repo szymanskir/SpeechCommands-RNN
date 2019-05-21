@@ -90,7 +90,7 @@ class DataReader:
         )
         pool = multiprocessing.Pool()
         return sum(
-            [], list(pool.map(self._read_single_word_samples_dir, word_samples_dir))
+            list(pool.map(self._read_single_word_samples_dir, word_samples_dir)), []
         )
 
     @staticmethod

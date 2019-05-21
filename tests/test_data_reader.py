@@ -1,7 +1,7 @@
 import os
 from os.path import join, basename
 import pytest
-from rnnhearer.data_manipulation import DataReader, _SPEECH_COMMANDS_SAMPLES_DIRECTORIES
+from rnnhearer.data_reader import DataReader, _SPEECH_COMMANDS_SAMPLES_DIRECTORIES
 
 
 @pytest.fixture
