@@ -1,4 +1,4 @@
-.PHONY: clean lint requirements tests
+.PHONY: clean lint requirements tests data
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -24,6 +24,13 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 	rm -rf .mypy_cache
+	rm -rf data/train
+
+## Download kaggle dataset
+data: data/speech_commands_v0.01.tar.gz 
+	mkdir data/train
+	mkdir data/train/audio
+	tar xf data/speech_commands_v0.01.tar.gz -C data/train/audio
 
 ## Lint using flake8 nad check types using mypy
 lint:
@@ -42,6 +49,8 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 
+data/speech_commands_v0.01.tar.gz:
+	wget http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz -P data/
 
 #################################################################################
 # Self Documenting Commands                                                     #
