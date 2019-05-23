@@ -22,7 +22,7 @@ data = data_reader.read()
 audio_samples = [d["audio_data"] for d in data]
 labels = np.array(
     [d["label"] if d["label"] in main_labels else "unknown" for d in data]
-).reshape(64721, 1)
+)
 
 label_encoder = LabelEncoder()
 encoded_labels = to_categorical(
@@ -41,6 +41,6 @@ model.fit(
     x=audio_samples_padded.reshape(64721, 8000, 1),
     y=encoded_labels,
     validation_split=0.2,
-    epochs=2,
+    epochs=10,
     batch_size=512,
 )
