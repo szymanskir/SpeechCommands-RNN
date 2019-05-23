@@ -31,7 +31,7 @@ encoded_labels = to_categorical(
 audio_samples_padded = pad_sequences(audio_samples)
 
 model = models.Sequential()
-model.add(layers.CuDNNLSTM(32, input_shape=(audio_samples_padded[0]).shape))
+model.add(layers.CuDNNLSTM(64, input_shape=(audio_samples_padded[0]).shape))
 model.add(layers.Dense(num_classes, activation="softmax"))
 model.compile(
     optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"]
