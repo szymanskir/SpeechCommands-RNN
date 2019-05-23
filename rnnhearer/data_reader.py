@@ -66,7 +66,7 @@ class DataReader:
         self, audio_data_file: np.array, label: str
     ) -> Dict[np.array, str]:
         audio_data = resample(x=wavfile.read(audio_data_file)[1], num=8000)
-        return {"audio_data": audio_data, "label": label}
+        return {"audio_data": np.atleast_2d(audio_data).T, "label": label}
 
     def _read_single_word_samples_dir(
         self, word_samples_dir: str
