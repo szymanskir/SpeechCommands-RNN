@@ -40,5 +40,5 @@ model.fit(
     y=encoded_labels,
     validation_split=0.2,
     epochs=2,
-    batch_size=10,
+    batch_size=128,
 )
