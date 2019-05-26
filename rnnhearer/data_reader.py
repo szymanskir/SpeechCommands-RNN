@@ -5,7 +5,8 @@ import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
-from typing import Dict, List
+from scipy.signal import resample
+from typing import Dict, List, Union
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,9 +64,9 @@ class DataReader:
 
     def _create_single_record(
         self, audio_data_file: np.array, label: str
-    ) -> Dict[np.array, str]:
-        _, audio_data = wavfile.read(audio_data_file)
-        return {"audio_data": audio_data, "label": label}
+    ) -> Dict[str, Union[np.array, str]]:
+        audio_data = resample(x=wavfile.read(audio_data_file)[1], num=8000)
+        return {"audio_data": np.atleast_2d(audio_data).T, "label": label}
 
     def _read_single_word_samples_dir(
         self, word_samples_dir: str
