@@ -14,7 +14,7 @@ import pandas as pd
 # def test_history_to_df_conversion(sample_history):
 #     history_df: pd.DataFrame = history_to_df(sample_history)
 #     assert (history_df["model_name"] == sample_history.model.name).all()
-#     assert (history_df["val_loss"] == sample_history.history["val_loss"]).all() 
-#     assert (history_df["loss"] == sample_history.history["loss"]).all() 
-#     assert (history_df["val_acc"] == sample_history.history["val_acc"]).all() 
-#     assert (history_df["acc"] == sample_history.history["acc"]).all() 
+#     assert (history_df["val_loss"] == sample_history.history["val_loss"]).all()
+#     assert (history_df["loss"] == sample_history.history["loss"]).all()
+#     assert (history_df["val_acc"] == sample_history.history["val_acc"]).all()
+#     assert (history_df["acc"] == sample_history.history["acc"]).all()

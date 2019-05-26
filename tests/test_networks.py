@@ -12,6 +12,7 @@ def sample_config():
 
 def test_NetworkConfiguration_from_file_init(sample_config):
     result: NetworkConfiguration = NetworkConfiguration.from_config(sample_config)
+    assert result.name == "TestNetwork"
     assert result.units_per_layer == [32, 32]
     assert result.representation == AudioRepresentation.RAW
     assert result.dropout_probabilities == [0, 0.2]

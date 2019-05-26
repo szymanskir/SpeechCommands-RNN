@@ -6,8 +6,8 @@ from os import listdir
 from os.path import join
 from rnnhearer.data_reader import DataReader
 from rnnhearer.data_manipulation import encode_categorical_labels
-from rnnhearer.networks import create_sample_rnn
-from rnnhearer.utils import read_pickle
+from rnnhearer.networks import NetworkConfiguration, create_network_from_config
+from rnnhearer.utils import read_config, read_pickle, write_pickle
 from rnnhearer.visualization import (
     plot_loss,
     plot_accuracy,
@@ -30,8 +30,11 @@ def main():
 
 
 @main.command()
+@click.argument("input_config", type=click.Path(exists=True))
 @click.option("--train_data", type=click.Path(exists=True), required=True)
-def train(train_data: str):
+@click.option("--output", type=click.Path())
+def train(input_config: str, train_data: str, output: str):
+    network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = [
         "yes",
         "no",
@@ -57,20 +60,25 @@ def train(train_data: str):
         labels=labels, kept_labels=main_labels + ["unknown"]
     )
 
-    model = create_sample_rnn(
-        input_shape=audio_samples[0].shape, num_classes=num_classes
+    model = create_network_from_config(
+        network_configuration=network_config,
+        input_shape=audio_samples[0].shape,
+        num_classes=num_classes
     )
     model.compile(
         optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"]
     )
 
-    model.fit(
+    history = model.fit(
         x=audio_samples_padded,
         y=encoded_labels,
         validation_split=0.2,
-        epochs=10,
-        batch_size=256,
+        epochs=network_config.epochs_count,
+        batch_size=network_config.batch_size
     )
+
+    if output:
+        write_pickle(history, output)
 
 
 @main.command()
