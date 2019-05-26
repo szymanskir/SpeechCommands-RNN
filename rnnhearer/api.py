@@ -28,12 +28,17 @@ def setup_logging():
 def main():
     setup_logging()
 
-
 @main.command()
 @click.argument("input_config", type=click.Path(exists=True))
 @click.option("--train_data", type=click.Path(exists=True), required=True)
 @click.option("--output", type=click.Path())
 def train(input_config: str, train_data: str, output: str):
+    train_inner(input_config=input_config,
+                train_data=train_data,
+                output=output)
+
+
+def train_inner(input_config: str, train_data: str, output: str):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = [
         "yes",
@@ -88,6 +93,18 @@ def train(input_config: str, train_data: str, output: str):
 @click.option("--roc_auc", is_flag=True)
 @click.option("--confusion_matrix", is_flag=True)
 def visualize(
+    histories_dir: str, loss: bool, acc: bool, roc_auc: bool, confusion_matrix: bool
+):
+    visualize_inner(
+        histories_dir=histories_dir,
+        loss=loss,
+        acc=acc,
+        roc_auc=roc_auc,
+        confusion_matrix=confusion_matrix
+    )
+
+
+def visualize_inner(
     histories_dir: str, loss: bool, acc: bool, roc_auc: bool, confusion_matrix: bool
 ):
     history_files = listdir(histories_dir)
