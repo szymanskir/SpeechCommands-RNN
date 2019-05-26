@@ -22,19 +22,17 @@ def create_network_from_config(
     ]
     should_return_sequence[-1] = False
     model.add(
-        layers.LSTM(
+        layers.CuDNNLSTM(
             units=network_configuration.units_per_layer[0],
             input_shape=input_shape,
-            recurrent_dropout=network_configuration.dropout_probabilities[0],
             return_sequences=should_return_sequence[0],
         )
     )
 
     layers_count = len(network_configuration.units_per_layer)
     for layer_num in range(1, layers_count):
-        layer = layers.LSTM(
+        layer = layers.CuDNNLSTM(
             units=network_configuration.units_per_layer[layer_num],
-            recurrent_dropout=network_configuration.dropout_probabilities[layer_num],
             return_sequences=should_return_sequence[layer_num],
         )
         model.add(layer)
