@@ -2,13 +2,12 @@ import pytest
 import pandas as pd
 
 from os.path import dirname, join
-from keras.callbacks import History
 from rnnhearer.data_manipulation import *
 from rnnhearer.utils import read_pickle
 
 
 @pytest.fixture
-def sample_history() -> History:
+def sample_history():
     return read_pickle(join(dirname(__file__), "resources", "model-history.pkl"))
 
 
