@@ -62,15 +62,16 @@ def train_inner(
     ]
     num_classes = len(main_labels) + 1
 
-    audio_samples: List[Tuple[np.ndarray, int]] = [d["audio_data"] for d in data]
+    labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
+    data: List[Tuple[np.ndarray, int]] = [d["audio_data"] for d in data]
     converter = AudioRepresentationConverterFactory.create_converter(
         network_config.representation
     )
-    audio_samples_padded = pad_sequences([sample_array for _, sample_array in audio_samples])
-    audio_samples_padded = [(16000, sample_array) for sample_array in audio_samples_padded]
-    audio_samples = np.array(converter.convert_audio_signal(audio_samples_padded))
 
-    labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
+    data = pad_sequences([sample_array for _, sample_array in data])
+    data = [(16000, sample_array) for sample_array in data]
+    data = np.array(converter.convert_audio_signal(data))
+
     encoded_labels = encode_categorical_labels(
         labels=labels, kept_labels=main_labels + ["unknown"]
     )
@@ -78,7 +79,7 @@ def train_inner(
     logging.info("Creating model...")
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=audio_samples[0].shape,
+        input_shape=data[0].shape,
         num_classes=num_classes,
     )
     model.compile(
@@ -86,7 +87,7 @@ def train_inner(
     )
 
     history = model.fit(
-        x=audio_samples,
+        x=data,
         y=encoded_labels,
         validation_split=0.2,
         epochs=network_config.epochs_count,
