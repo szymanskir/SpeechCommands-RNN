@@ -39,13 +39,11 @@ def main():
 @click.option("--train_data", type=click.Path(exists=True), required=True)
 @click.option("--output", type=click.Path())
 def train(input_config: str, train_data: str, output: str):
-    data_reader = DataReader(train_data)
-    data = data_reader.read()
-    train_inner(input_config=input_config, data=data, output=output)
+    train_inner(input_config=input_config, train_data=train_data, output=output)
 
 
 def train_inner(
-    input_config: str, data: List[Dict[str, Union[np.ndarray, str]]], output: str
+    input_config: str, train_data: str, output: str
 ):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = [
@@ -62,6 +60,8 @@ def train_inner(
     ]
     num_classes = len(main_labels) + 1
 
+    data_reader = DataReader(train_data)
+    data = data_reader.read()
     labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
     data: List[Tuple[np.ndarray, int]] = [d["audio_data"] for d in data]
     converter = AudioRepresentationConverterFactory.create_converter(
