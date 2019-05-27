@@ -3,13 +3,15 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.preprocessing.sequence import pad_sequences
-from os import listdir
-from os.path import join
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 from .data_reader import DataReader
 from .data_manipulation import encode_categorical_labels
-from .networks import NetworkConfiguration, create_network_from_config
+from .networks import (
+    NetworkConfiguration,
+    create_network_from_config,
+    AudioRepresentationConverterFactory,
+)
 from .utils import read_config, read_pickle, write_pickle
 from .visualization import (
     plot_loss,
@@ -60,7 +62,11 @@ def train_inner(
     ]
     num_classes = len(main_labels) + 1
 
-    audio_samples: List[np.ndarray] = [d["audio_data"] for d in data]
+    audio_samples: List[Tuple[np.ndarray, int]] = [d["audio_data"] for d in data]
+    converter = AudioRepresentationConverterFactory.create_converter(
+        network_config.representation
+    )
+    audio_samples = converter.convert_audio_signal(audio_samples)
     audio_samples_padded = pad_sequences(audio_samples)
 
     labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
@@ -68,9 +74,10 @@ def train_inner(
         labels=labels, kept_labels=main_labels + ["unknown"]
     )
 
+    logging.info("Creating model...")
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=audio_samples[0].shape,
+        input_shape=audio_samples_padded[0].shape,
         num_classes=num_classes,
     )
     model.compile(
@@ -111,9 +118,7 @@ def visualize_inner(
     histories_dir: str, loss: bool, acc: bool, roc_auc: bool, confusion_matrix: bool
 ):
     history_files = list(Path(histories_dir).glob("*.pkl"))
-    histories = [
-        read_pickle(history_file) for history_file in history_files
-    ]
+    histories = [read_pickle(history_file) for history_file in history_files]
 
     main_labels = [
         "yes",
