@@ -47,6 +47,7 @@ pyparsing==2.4.0
 pytest==4.5.0
 python-dateutil==2.8.0
 python-slugify==3.0.2
+python-speech-features==0.6
 pytz==2019.1
 PyYAML==5.1
 requests==2.22.0
