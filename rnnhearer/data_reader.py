@@ -5,7 +5,7 @@ import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
-from scipy.signal import resample
+from scipy.signal import spectrogram, resample
 from typing import Dict, List
 
 _LOGGER = logging.getLogger(__name__)
@@ -66,6 +66,7 @@ class DataReader:
         self, audio_data_file: np.array, label: str
     ) -> Dict[np.array, str]:
         audio_data = resample(x=wavfile.read(audio_data_file)[1], num=8000)
+        audio_data = spectrogram(audio_data)[2]
         return {"audio_data": np.atleast_2d(audio_data).T, "label": label}
 
     def _read_single_word_samples_dir(
