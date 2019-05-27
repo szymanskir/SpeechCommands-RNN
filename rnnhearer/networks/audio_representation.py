@@ -35,8 +35,9 @@ class MFCCAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
         self, audio_samples: List[Tuple[np.ndarray, int]]
     ) -> List[np.ndarray]:
+        breakpoint()
         return [
-            mfcc(signal=audio_sample[1], samplerate=audio_samples[0])
+            mfcc(signal=audio_sample[1], samplerate=audio_sample[0])
             for audio_sample in audio_samples
         ]
 
