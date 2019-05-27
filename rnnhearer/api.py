@@ -5,6 +5,7 @@ import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 from os import listdir
 from os.path import join
+from pathlib import Path
 from typing import Dict, List, Union
 from .data_reader import DataReader
 from .data_manipulation import encode_categorical_labels
@@ -109,9 +110,9 @@ def visualize(
 def visualize_inner(
     histories_dir: str, loss: bool, acc: bool, roc_auc: bool, confusion_matrix: bool
 ):
-    history_files = listdir(histories_dir)
+    history_files = list(Path(histories_dir).glob("*.pkl"))
     histories = [
-        read_pickle(join(histories_dir, history_file)) for history_file in history_files
+        read_pickle(history_file) for history_file in history_files
     ]
 
     main_labels = [
