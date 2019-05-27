@@ -19,7 +19,7 @@ class NetworkConfiguration:
         config = config_parser["DEFAULT"]
         name = config.get("Name")
         units_per_layer = [int(units) for units in config["UnitsPerLayer"].split(",")]
-        representation = AudioRepresentation[config["SignalRepresentation"]]
+        representation = AudioRepresentation(config["SignalRepresentation"])
         dropout_probabilities = [
             float(prob) for prob in config["DropoutProbabilities"].split(",")
         ]

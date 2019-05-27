@@ -1,9 +1,11 @@
 import click
 import logging
 import matplotlib.pyplot as plt
+import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 from os import listdir
 from os.path import join
+from typing import Dict, List, Union
 from .data_reader import DataReader
 from .data_manipulation import encode_categorical_labels
 from .networks import NetworkConfiguration, create_network_from_config
@@ -28,17 +30,20 @@ def setup_logging():
 def main():
     setup_logging()
 
+
 @main.command()
 @click.argument("input_config", type=click.Path(exists=True))
 @click.option("--train_data", type=click.Path(exists=True), required=True)
 @click.option("--output", type=click.Path())
 def train(input_config: str, train_data: str, output: str):
-    train_inner(input_config=input_config,
-                train_data=train_data,
-                output=output)
+    data_reader = DataReader(train_data)
+    data = data_reader.read()
+    train_inner(input_config=input_config, data=data, output=output)
 
 
-def train_inner(input_config: str, train_data: str, output: str):
+def train_inner(
+    input_config: str, data: List[Dict[str, Union[np.ndarray, str]]], output: str
+):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = [
         "yes",
@@ -54,10 +59,7 @@ def train_inner(input_config: str, train_data: str, output: str):
     ]
     num_classes = len(main_labels) + 1
 
-    data_reader = DataReader(train_data)
-    data = data_reader.read()
-
-    audio_samples = [d["audio_data"] for d in data]
+    audio_samples: List[np.ndarray] = [d["audio_data"] for d in data]
     audio_samples_padded = pad_sequences(audio_samples)
 
     labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
@@ -68,7 +70,7 @@ def train_inner(input_config: str, train_data: str, output: str):
     model = create_network_from_config(
         network_configuration=network_config,
         input_shape=audio_samples[0].shape,
-        num_classes=num_classes
+        num_classes=num_classes,
     )
     model.compile(
         optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"]
@@ -79,7 +81,7 @@ def train_inner(input_config: str, train_data: str, output: str):
         y=encoded_labels,
         validation_split=0.2,
         epochs=network_config.epochs_count,
-        batch_size=network_config.batch_size
+        batch_size=network_config.batch_size,
     )
 
     if output:
@@ -100,7 +102,7 @@ def visualize(
         loss=loss,
         acc=acc,
         roc_auc=roc_auc,
-        confusion_matrix=confusion_matrix
+        confusion_matrix=confusion_matrix,
     )
 
 
