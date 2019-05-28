@@ -1,17 +1,10 @@
 import click
 import logging
 import matplotlib.pyplot as plt
-import numpy as np
-from keras.preprocessing.sequence import pad_sequences
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
 from .data_reader import DataReader
 from .data_manipulation import AudioDataGenerator
-from .networks import (
-    NetworkConfiguration,
-    create_network_from_config,
-    AudioRepresentationConverterFactory,
-)
+from .networks import NetworkConfiguration, create_network_from_config
 from .utils import read_config, read_pickle, write_pickle
 from .visualization import (
     plot_loss,

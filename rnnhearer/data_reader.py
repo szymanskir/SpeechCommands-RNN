@@ -1,10 +1,8 @@
 import logging
-import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
-from typing import Dict, List, Tuple, Iterable, Set
-from .data_manipulation import encode_categorical_labels
+from typing import List, Tuple, Set
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -4,10 +4,11 @@ from enum import auto
 from python_speech_features import mfcc
 from scipy.signal import resample, spectrogram
 from strenum import StrEnum
-from typing import List, Tuple
+from typing import List, Tuple, Type, Mapping
 
 
 class AudioRepresentation(StrEnum):
+    RAW = auto()
     SPECTROGRAM = auto()
     MFCC = auto()
 
@@ -17,7 +18,7 @@ class IAudioRepresentationConverter(metaclass=ABCMeta):
     def convert_audio_signal(
         self, audio_samples: List[Tuple[np.ndarray, int]]
     ) -> List[np.ndarray]:
-        pass
+        raise NotImplementedError("subclasses must override foo()!")
 
 
 class SpectrogramAudioRepresentationConverter(IAudioRepresentationConverter):
@@ -46,10 +47,9 @@ class AudioRepresentationConverterFactory:
     def create_converter(
         audio_representaion: AudioRepresentation
     ) -> IAudioRepresentationConverter:
-        converters = {
+        converters: Mapping[auto, Type[IAudioRepresentationConverter]] = {
             AudioRepresentation.SPECTROGRAM: SpectrogramAudioRepresentationConverter,
             AudioRepresentation.MFCC: MFCCAudioRepresentationConverter,
         }
 
-        constructor = converters[audio_representaion]
-        return constructor()
+        return converters[audio_representaion]()
