@@ -74,7 +74,7 @@ def train_inner(input_config: str, train_data: str, output: str):
     print(tmp.shape)
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=tmp.shape,
+        input_shape=(129, 35),
         num_classes=num_classes,
     )
     model.compile(
@@ -82,7 +82,9 @@ def train_inner(input_config: str, train_data: str, output: str):
     )
 
     history = model.fit_generator(
-        generator=data_gen, steps_per_epoch=10, epochs=network_config.epochs_count
+        generator=data_gen,
+        steps_per_epoch=len(data) / 32,
+        epochs=network_config.epochs_count,
     )
 
     if output:

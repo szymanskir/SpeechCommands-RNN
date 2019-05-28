@@ -5,20 +5,51 @@ from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
 from typing import Dict, List, Tuple, Iterable
+from .data_manipulation import encode_categorical_labels
 
 _LOGGER = logging.getLogger(__name__)
 
 _SPEECH_COMMANDS_SAMPLES_DIRECTORIES = {
+    "bed",
     "yes",
+    "bird",
     "no",
+    "cat",
     "up",
+    "dog",
     "down",
-    "left",
-    "right",
-    "on",
-    "off",
-    "stop",
+    "down",
+    "eight",
+    "five",
+    "four",
     "go",
+    "happy",
+    "house",
+    "left",
+    "left",
+    "marvin",
+    "nine",
+    "no",
+    "off",
+    "on",
+    "one",
+    "right",
+    "right",
+    "seven",
+    "on",
+    "sheila",
+    "off",
+    "six",
+    "stop",
+    "stop",
+    "three",
+    "go",
+    "tree",
+    "two",
+    "up",
+    "wow",
+    "yes",
+    "zero",
 }
 
 
@@ -66,9 +97,38 @@ class DataReader:
         return sum(list(map(self._read_single_word_samples_dir, word_samples_dir)), [])
 
     def flow(self, input_x, converter) -> Iterable[Tuple[np.ndarray, str]]:
-        for filepath, label in input_x:
-            audio_file = wavfile.read(filepath)
-            yield (converter.convert_audio_signal([(16000, audio_file[1])])[0], label)
+        main_labels = set(
+            [
+                "yes",
+                "no",
+                "up",
+                "down",
+                "left",
+                "right",
+                "on",
+                "off",
+                "stop",
+                "go",
+                "unknown",
+            ]
+        )
+
+        def chunks(l, n):
+            """Yield successive n-sized chunks from l."""
+            for i in range(0, len(l), n):
+                yield l[i : i + n]
+
+        for chunk in chunks(input_x, 32):
+            files = [wavfile.read(path) for path, _ in chunk]
+            labels = [
+                label if label in main_labels else "unknown" for _, label in chunk
+            ]
+
+            converted = converter.convert_audio_signal(files)
+
+            yield np.concatenate([converted]), encode_categorical_labels(
+                labels=labels, kept_labels=main_labels
+            )
 
     @staticmethod
     def _find_all_wav_files(dir: str):
