@@ -4,7 +4,7 @@ import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple, Iterable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,18 +48,15 @@ class DataReader:
 
     def _read_single_word_samples_dir(
         self, word_samples_dir: str
-    ) -> List[Dict[np.array, str]]:
+    ) -> List[Tuple[Path, str]]:
         _LOGGER.info(f"Reading samples from {word_samples_dir}...")
         word_audio_samples = self._find_all_wav_files(
             join(self._audio_source, word_samples_dir)
         )
         label = basename(word_samples_dir)
-        return [
-            self._create_single_record(audio_data_file, label)
-            for audio_data_file in word_audio_samples
-        ]
+        return [(audio_data_file, label) for audio_data_file in word_audio_samples]
 
-    def read(self) -> List[Dict[np.array, str]]:
+    def read(self) -> List[Tuple[Path, str]]:
         word_samples_dir = list(
             filter(
                 lambda x: x in _SPEECH_COMMANDS_SAMPLES_DIRECTORIES,
@@ -67,6 +64,11 @@ class DataReader:
             )
         )
         return sum(list(map(self._read_single_word_samples_dir, word_samples_dir)), [])
+
+    def flow(self, input_x, converter) -> Iterable[Tuple[np.ndarray, str]]:
+        for filepath, label in input_x:
+            audio_file = wavfile.read(filepath)
+            yield (converter.convert_audio_signal([(16000, audio_file[1])])[0], label)
 
     @staticmethod
     def _find_all_wav_files(dir: str):

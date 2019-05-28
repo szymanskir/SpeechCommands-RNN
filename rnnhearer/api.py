@@ -43,9 +43,7 @@ def train(input_config: str, train_data: str, output: str):
     train_inner(input_config=input_config, train_data=train_data, output=output)
 
 
-def train_inner(
-    input_config: str, train_data: str, output: str
-):
+def train_inner(input_config: str, train_data: str, output: str):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = [
         "yes",
@@ -63,38 +61,28 @@ def train_inner(
 
     data_reader = DataReader(train_data)
     data = data_reader.read()
-    labels = [d["label"] if d["label"] in main_labels else "unknown" for d in data]
-    data: List[Tuple[np.ndarray, int]] = [d["audio_data"] for d in data]
+
     converter = AudioRepresentationConverterFactory.create_converter(
         network_config.representation
     )
-
-    data = pad_sequences([sample_array for _, sample_array in data])
-    data = [(16000, sample_array) for sample_array in data]
-    data = np.array(converter.convert_audio_signal(data))
-
-    encoded_labels = encode_categorical_labels(
-        labels=labels, kept_labels=main_labels + ["unknown"]
-    )
+    data_gen = data_reader.flow(data, converter)
 
     logging.info("Creating model...")
     p = gc.collect()
-    logging.info(f'Garbage collected: {p}')
+    logging.info(f"Garbage collected: {p}")
+    tmp = next(data_gen)[0]
+    print(tmp.shape)
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=data[0].shape,
+        input_shape=tmp.shape,
         num_classes=num_classes,
     )
     model.compile(
         optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"]
     )
 
-    history = model.fit(
-        x=data,
-        y=encoded_labels,
-        validation_split=0.2,
-        epochs=network_config.epochs_count,
-        batch_size=network_config.batch_size,
+    history = model.fit_generator(
+        generator=data_gen, steps_per_epoch=10, epochs=network_config.epochs_count
     )
 
     if output:
