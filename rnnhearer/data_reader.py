@@ -3,7 +3,7 @@ import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
-from typing import Dict, List, Tuple, Iterable
+from typing import Dict, List, Tuple, Iterable, Set
 from .data_manipulation import encode_categorical_labels
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,7 +71,9 @@ class DataReader:
                 f"Missing directories of samples: {missing_directories}"
             )
 
-    def read(self) -> Tuple[List[Tuple[Path, str]], List[Tuple[Path, str]]]:
+    def read(
+        self, recognized_labels: Set[str]
+    ) -> Tuple[List[Tuple[Path, str]], List[Tuple[Path, str]]]:
         word_samples_dir = list(
             filter(
                 lambda x: x in _SPEECH_COMMANDS_SAMPLES_DIRECTORIES,
@@ -90,6 +92,10 @@ class DataReader:
                 join(self._audio_source, directory)
             )
             label = basename(directory)
+
+            if label not in recognized_labels:
+                label = "unknown"
+
             for audio_data_file in word_audio_samples:
                 sample = (audio_data_file, label)
                 if (

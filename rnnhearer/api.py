@@ -61,7 +61,7 @@ def train_inner(input_config: str, data_dir: str, output: str):
     num_classes = len(main_labels)
 
     data_reader = DataReader(data_dir, join(data_dir, "audio", "validation_list.txt"))
-    train_data, validation_data = data_reader.read()
+    train_data, validation_data = data_reader.read(main_labels)
 
     logging.info("Creating model...")
 
