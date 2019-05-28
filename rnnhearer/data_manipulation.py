@@ -36,9 +36,28 @@ class AudioDataGenerator:
                     labels=labels, kept_labels=kept_labels
                 )
 
+    def flow_in_memory(
+        self, samples: List[Tuple[Path, str]], kept_labels: Set[str], batch_size: int
+    ):
+        data = []
+        for chunk in chunks(samples, batch_size):
+            files = [wavfile.read(path) for path, _ in chunk]
+
+            converted = self._converter.convert_audio_signal(files)
+            labels = [label for _, label in chunk]
+            data.append(
+                (
+                    np.concatenate([converted]),
+                    encode_categorical_labels(labels=labels, kept_labels=kept_labels),
+                )
+            )
+
+        while True:
+            for chunk in data:
+                yield chunk
+
 
 def encode_categorical_labels(labels: List[str], kept_labels: Set[str]) -> np.ndarray:
-    labels = [label if label in kept_labels else "unknown" for label in labels]
     label_encoder = LabelEncoder()
     encoded_labels = to_categorical(
         y=label_encoder.fit_transform(labels), num_classes=len(kept_labels)

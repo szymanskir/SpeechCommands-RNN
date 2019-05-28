@@ -84,7 +84,7 @@ def train_inner(input_config: str, data_dir: str, output: str):
         ),
         steps_per_epoch=len(train_data) / network_config.batch_size,
         epochs=network_config.epochs_count,
-        validation_data=generator.flow(
+        validation_data=generator.flow_in_memory(
             samples=validation_data,
             kept_labels=main_labels,
             batch_size=network_config.batch_size,
