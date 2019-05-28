@@ -16,10 +16,26 @@ class AudioDataGenerator:
             audio_representation
         )
 
+    def _read_wavfile(self, sample_filepath):
+        file_data = wavfile.read(sample_filepath)
+        samples = file_data[1]
+        sr = file_data[0]
+        if len(samples) >= sr:
+            samples = samples
+        else:
+            samples = np.pad(
+                samples,
+                pad_width=(sr - len(samples), 0),
+                mode="constant",
+                constant_values=(0, 0),
+            )
+
+        return sr, samples
+
     def get_data_shape(self, sample_filepath: Path):
 
         converted_sample = self._converter.convert_audio_signal(
-            [wavfile.read(sample_filepath)]
+            [self._read_wavfile(sample_filepath)]
         )[0]
         return converted_sample.shape
 
@@ -28,20 +44,21 @@ class AudioDataGenerator:
     ):
         while True:
             for chunk in chunks(samples, batch_size):
-                files = [wavfile.read(path) for path, _ in chunk]
+                files = [self._read_wavfile(path) for path, _ in chunk]
 
                 converted = self._converter.convert_audio_signal(files)
                 labels = [label for _, label in chunk]
-                yield np.concatenate([converted]), encode_categorical_labels(
-                    labels=labels, kept_labels=kept_labels
-                )
+                X = np.concatenate([converted])
+                y = encode_categorical_labels(labels=labels, kept_labels=kept_labels)
+
+                yield X, y
 
     def flow_in_memory(
         self, samples: List[Tuple[Path, str]], kept_labels: Set[str], batch_size: int
     ):
         data = []
         for chunk in chunks(samples, batch_size):
-            files = [wavfile.read(path) for path, _ in chunk]
+            files = [self._read_wavfile(path) for path, _ in chunk]
 
             converted = self._converter.convert_audio_signal(files)
             labels = [label for _, label in chunk]
