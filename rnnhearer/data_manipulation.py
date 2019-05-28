@@ -11,37 +11,30 @@ from .networks import AudioRepresentation, AudioRepresentationConverterFactory
 
 
 class AudioDataGenerator:
-    @staticmethod
-    def get_data_shape(
-        sample_filepath: Path, audio_representation: AudioRepresentation
-    ):
-        converter = AudioRepresentationConverterFactory.create_converter(
+    def __init__(self, audio_representation: AudioRepresentation):
+        self._converter = AudioRepresentationConverterFactory.create_converter(
             audio_representation
         )
-        converted_sample = converter.convert_audio_signal(
+
+    def get_data_shape(self, sample_filepath: Path):
+
+        converted_sample = self._converter.convert_audio_signal(
             [wavfile.read(sample_filepath)]
         )[0]
         return converted_sample.shape
 
-    @staticmethod
     def flow(
-        samples: List[Tuple[Path, str]],
-        audio_representation: AudioRepresentation,
-        kept_labels: Set[str],
-        batch_size: int,
+        self, samples: List[Tuple[Path, str]], kept_labels: Set[str], batch_size: int
     ):
-        converter = AudioRepresentationConverterFactory.create_converter(
-            audio_representation
-        )
+        while True:
+            for chunk in chunks(samples, batch_size):
+                files = [wavfile.read(path) for path, _ in chunk]
 
-        for chunk in chunks(samples, batch_size):
-            files = [wavfile.read(path) for path, _ in chunk]
-
-            converted = converter.convert_audio_signal(files)
-            labels = [label for _, label in chunk]
-            yield np.concatenate([converted]), encode_categorical_labels(
-                labels=labels, kept_labels=kept_labels
-            )
+                converted = self._converter.convert_audio_signal(files)
+                labels = [label for _, label in chunk]
+                yield np.concatenate([converted]), encode_categorical_labels(
+                    labels=labels, kept_labels=kept_labels
+                )
 
 
 def encode_categorical_labels(labels: List[str], kept_labels: Set[str]) -> np.ndarray:

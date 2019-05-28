@@ -65,12 +65,11 @@ def train_inner(input_config: str, train_data: str, output: str):
 
     logging.info("Creating model...")
 
+    generator = AudioDataGenerator(network_config.representation)
+
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=AudioDataGenerator.get_data_shape(
-            sample_filepath=data[0][0],
-            audio_representation=network_config.representation,
-        ),
+        input_shape=generator.get_data_shape(sample_filepath=data[0][0]),
         num_classes=num_classes,
     )
     model.compile(
@@ -78,11 +77,8 @@ def train_inner(input_config: str, train_data: str, output: str):
     )
 
     history = model.fit_generator(
-        generator=AudioDataGenerator.flow(
-            samples=data,
-            audio_representation=network_config.representation,
-            kept_labels=main_labels,
-            batch_size=network_config.batch_size,
+        generator=generator.flow(
+            samples=data, kept_labels=main_labels, batch_size=network_config.batch_size
         ),
         steps_per_epoch=len(data) / network_config.batch_size,
         epochs=network_config.epochs_count,

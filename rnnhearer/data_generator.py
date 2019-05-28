@@ -1,3 +1,0 @@
-class DataGenerator:
-    pass
-
