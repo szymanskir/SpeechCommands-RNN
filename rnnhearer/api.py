@@ -1,5 +1,4 @@
 import click
-import gc
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,6 +19,7 @@ from .visualization import (
     plot_roc_curves,
     plot_confusion_matrix,
 )
+from os.path import join
 
 
 def setup_logging():
@@ -37,13 +37,13 @@ def main():
 
 @main.command()
 @click.argument("input_config", type=click.Path(exists=True))
-@click.option("--train_data", type=click.Path(exists=True), required=True)
+@click.option("--data_dir", type=click.Path(exists=True), required=True)
 @click.option("--output", type=click.Path())
-def train(input_config: str, train_data: str, output: str):
-    train_inner(input_config=input_config, train_data=train_data, output=output)
+def train(input_config: str, data_dir: str, output: str):
+    train_inner(input_config=input_config, data_dir=data_dir, output=output)
 
 
-def train_inner(input_config: str, train_data: str, output: str):
+def train_inner(input_config: str, data_dir: str, output: str):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
     main_labels = {
         "yes",
@@ -60,8 +60,8 @@ def train_inner(input_config: str, train_data: str, output: str):
     }
     num_classes = len(main_labels)
 
-    data_reader = DataReader(train_data)
-    data = data_reader.read()
+    data_reader = DataReader(data_dir, join(data_dir, "audio", "validation_list.txt"))
+    train_data, validation_data = data_reader.read()
 
     logging.info("Creating model...")
 
@@ -69,7 +69,7 @@ def train_inner(input_config: str, train_data: str, output: str):
 
     model = create_network_from_config(
         network_configuration=network_config,
-        input_shape=generator.get_data_shape(sample_filepath=data[0][0]),
+        input_shape=generator.get_data_shape(sample_filepath=train_data[0][0]),
         num_classes=num_classes,
     )
     model.compile(
@@ -78,10 +78,18 @@ def train_inner(input_config: str, train_data: str, output: str):
 
     history = model.fit_generator(
         generator=generator.flow(
-            samples=data, kept_labels=main_labels, batch_size=network_config.batch_size
+            samples=train_data,
+            kept_labels=main_labels,
+            batch_size=network_config.batch_size,
         ),
-        steps_per_epoch=len(data) / network_config.batch_size,
+        steps_per_epoch=len(train_data) / network_config.batch_size,
         epochs=network_config.epochs_count,
+        validation_data=generator.flow(
+            samples=validation_data,
+            kept_labels=main_labels,
+            batch_size=network_config.batch_size,
+        ),
+        validation_steps=len(validation_data) / network_config.batch_size,
     )
 
     if output:
