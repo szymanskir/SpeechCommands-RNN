@@ -1,4 +1,5 @@
 import click
+import gc
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -77,6 +78,8 @@ def train_inner(
     )
 
     logging.info("Creating model...")
+    p = gc.collect()
+    logging.info(f'Garbage collected: {p}')
     model = create_network_from_config(
         network_configuration=network_config,
         input_shape=data[0].shape,
