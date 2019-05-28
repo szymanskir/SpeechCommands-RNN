@@ -12,6 +12,18 @@ from .networks import AudioRepresentation, AudioRepresentationConverterFactory
 
 class AudioDataGenerator:
     @staticmethod
+    def get_data_shape(
+        sample_filepath: Path, audio_representation: AudioRepresentation
+    ):
+        converter = AudioRepresentationConverterFactory.create_converter(
+            audio_representation
+        )
+        converted_sample = converter.convert_audio_signal(
+            [wavfile.read(sample_filepath)]
+        )[0]
+        return converted_sample.shape
+
+    @staticmethod
     def flow(
         samples: List[Tuple[Path, str]],
         audio_representation: AudioRepresentation,
