@@ -1,6 +1,5 @@
 import scipy.io.wavfile as wavfile
 import logging
-import multiprocessing
 import numpy as np
 from os import listdir
 from os.path import isdir, join, basename
@@ -87,10 +86,7 @@ class DataReader:
                 listdir(self._audio_source),
             )
         )
-        pool = multiprocessing.Pool()
-        return sum(
-            list(map(self._read_single_word_samples_dir, word_samples_dir)), []
-        )
+        return sum(list(map(self._read_single_word_samples_dir, word_samples_dir)), [])
 
     @staticmethod
     def _find_all_wav_files(dir: str):
