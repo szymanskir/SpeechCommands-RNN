@@ -7,7 +7,7 @@ from keras.preprocessing.sequence import pad_sequences
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 from .data_reader import DataReader
-from .data_manipulation import encode_categorical_labels
+from .data_manipulation import AudioDataGenerator
 from .networks import (
     NetworkConfiguration,
     create_network_from_config,
@@ -45,7 +45,7 @@ def train(input_config: str, train_data: str, output: str):
 
 def train_inner(input_config: str, train_data: str, output: str):
     network_config = NetworkConfiguration.from_config(read_config(input_config))
-    main_labels = [
+    main_labels = {
         "yes",
         "no",
         "up",
@@ -56,22 +56,15 @@ def train_inner(input_config: str, train_data: str, output: str):
         "off",
         "stop",
         "go",
-    ]
-    num_classes = len(main_labels) + 1
+        "unknown",
+    }
+    num_classes = len(main_labels)
 
     data_reader = DataReader(train_data)
     data = data_reader.read()
 
-    converter = AudioRepresentationConverterFactory.create_converter(
-        network_config.representation
-    )
-    data_gen = data_reader.flow(data, converter)
-
     logging.info("Creating model...")
-    p = gc.collect()
-    logging.info(f"Garbage collected: {p}")
-    tmp = next(data_gen)[0]
-    print(tmp.shape)
+
     model = create_network_from_config(
         network_configuration=network_config,
         input_shape=(129, 35),
@@ -82,7 +75,12 @@ def train_inner(input_config: str, train_data: str, output: str):
     )
 
     history = model.fit_generator(
-        generator=data_gen,
+        generator=AudioDataGenerator.flow(
+            samples=data,
+            audio_representation=network_config.representation,
+            kept_labels=main_labels,
+            batch_size=network_config.batch_size,
+        ),
         steps_per_epoch=len(data) / 32,
         epochs=network_config.epochs_count,
     )

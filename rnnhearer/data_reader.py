@@ -1,4 +1,3 @@
-import scipy.io.wavfile as wavfile
 import logging
 import numpy as np
 from os import listdir
@@ -95,40 +94,6 @@ class DataReader:
             )
         )
         return sum(list(map(self._read_single_word_samples_dir, word_samples_dir)), [])
-
-    def flow(self, input_x, converter) -> Iterable[Tuple[np.ndarray, str]]:
-        main_labels = set(
-            [
-                "yes",
-                "no",
-                "up",
-                "down",
-                "left",
-                "right",
-                "on",
-                "off",
-                "stop",
-                "go",
-                "unknown",
-            ]
-        )
-
-        def chunks(l, n):
-            """Yield successive n-sized chunks from l."""
-            for i in range(0, len(l), n):
-                yield l[i : i + n]
-
-        for chunk in chunks(input_x, 32):
-            files = [wavfile.read(path) for path, _ in chunk]
-            labels = [
-                label if label in main_labels else "unknown" for _, label in chunk
-            ]
-
-            converted = converter.convert_audio_signal(files)
-
-            yield np.concatenate([converted]), encode_categorical_labels(
-                labels=labels, kept_labels=main_labels
-            )
 
     @staticmethod
     def _find_all_wav_files(dir: str):
