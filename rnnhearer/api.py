@@ -58,7 +58,9 @@ def train_inner(input_config: str, data_dir: str, output: str):
 
     logging.info("Creating model...")
 
-    generator = AudioDataGenerator(network_config.representation)
+    generator = AudioDataGenerator(
+        network_config.representation, kept_labels=list(main_labels)
+    )
 
     model = create_network_from_config(
         network_configuration=network_config,
@@ -71,16 +73,12 @@ def train_inner(input_config: str, data_dir: str, output: str):
 
     history = model.fit_generator(
         generator=generator.flow(
-            samples=train_data,
-            kept_labels=main_labels,
-            batch_size=network_config.batch_size,
+            samples=train_data, batch_size=network_config.batch_size
         ),
         steps_per_epoch=len(train_data) / network_config.batch_size,
         epochs=network_config.epochs_count,
         validation_data=generator.flow_in_memory(
-            samples=validation_data,
-            kept_labels=main_labels,
-            batch_size=network_config.batch_size,
+            samples=validation_data, batch_size=network_config.batch_size
         ),
         validation_steps=len(validation_data) / network_config.batch_size,
     )

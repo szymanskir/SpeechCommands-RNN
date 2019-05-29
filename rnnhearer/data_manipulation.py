@@ -11,10 +11,15 @@ from .networks import AudioRepresentation, AudioRepresentationConverterFactory
 
 
 class AudioDataGenerator:
-    def __init__(self, audio_representation: AudioRepresentation):
+    def __init__(
+        self, audio_representation: AudioRepresentation, kept_labels: List[str]
+    ):
         self._converter = AudioRepresentationConverterFactory.create_converter(
             audio_representation
         )
+        self._encoder = LabelEncoder()
+        self._num_classes = len(kept_labels)
+        self._encoder.fit(kept_labels)
 
     def _read_wavfile(self, sample_filepath):
         file_data = wavfile.read(sample_filepath)
@@ -39,9 +44,7 @@ class AudioDataGenerator:
         )[0]
         return converted_sample.shape
 
-    def flow(
-        self, samples: List[Tuple[Path, str]], kept_labels: Set[str], batch_size: int
-    ):
+    def flow(self, samples: List[Tuple[Path, str]], batch_size: int):
         while True:
             for chunk in chunks(samples, batch_size):
                 files = [self._read_wavfile(path) for path, _ in chunk]
@@ -49,13 +52,11 @@ class AudioDataGenerator:
                 converted = self._converter.convert_audio_signal(files)
                 labels = [label for _, label in chunk]
                 X = np.concatenate([converted])
-                y = encode_categorical_labels(labels=labels, kept_labels=kept_labels)
+                y = to_categorical(self._encoder.transform(labels), self._num_classes)
 
                 yield X, y
 
-    def flow_in_memory(
-        self, samples: List[Tuple[Path, str]], kept_labels: Set[str], batch_size: int
-    ):
+    def flow_in_memory(self, samples: List[Tuple[Path, str]], batch_size: int):
         data = []
         for chunk in chunks(samples, batch_size):
             files = [self._read_wavfile(path) for path, _ in chunk]
@@ -65,22 +66,15 @@ class AudioDataGenerator:
             data.append(
                 (
                     np.concatenate([converted]),
-                    encode_categorical_labels(labels=labels, kept_labels=kept_labels),
+                    to_categorical(
+                        self._encoder.transform(labels), num_classes=self._num_classes
+                    ),
                 )
             )
 
         while True:
             for chunk in data:
                 yield chunk
-
-
-def encode_categorical_labels(labels: List[str], kept_labels: Set[str]) -> np.ndarray:
-    label_encoder = LabelEncoder()
-    encoded_labels = to_categorical(
-        y=label_encoder.fit_transform(labels), num_classes=len(kept_labels)
-    )
-
-    return encoded_labels
 
 
 def history_to_df(history: History) -> pd.DataFrame:
