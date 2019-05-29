@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 from enum import auto
 from python_speech_features import mfcc
-from scipy.signal import resample, spectrogram
+from scipy.signal import spectrogram
 from strenum import StrEnum
 from typing import List, Tuple, Type, Mapping
 
