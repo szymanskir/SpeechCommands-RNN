@@ -25,6 +25,7 @@ def create_network_from_config(
         layers.LSTM(
             units=network_configuration.units_per_layer[0],
             input_shape=input_shape,
+            dropout=network_configuration.dropout_probabilities[0],
             return_sequences=should_return_sequence[0],
         )
     )
@@ -33,6 +34,7 @@ def create_network_from_config(
     for layer_num in range(1, layers_count):
         layer = layers.LSTM(
             units=network_configuration.units_per_layer[layer_num],
+            dropout=network_configuration.dropout_probabilities[layer_num],
             return_sequences=should_return_sequence[layer_num],
         )
         model.add(layer)
