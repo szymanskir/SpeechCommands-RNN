@@ -21,6 +21,13 @@ class IAudioRepresentationConverter(metaclass=ABCMeta):
         raise NotImplementedError("subclasses must override foo()!")
 
 
+class RawAudioRepresentationConverter(IAudioRepresentationConverter):
+    def convert_audio_signal(
+        self, audio_samples: List[Tuple[np.ndarray, int]]
+    ) -> List[np.ndarray]:
+        return [np.atleast_2d(audio_sample[1]) for audio_sample in audio_samples]
+
+
 class SpectrogramAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
         self, audio_samples: List[Tuple[np.ndarray, int]]
@@ -48,6 +55,7 @@ class AudioRepresentationConverterFactory:
         audio_representaion: AudioRepresentation
     ) -> IAudioRepresentationConverter:
         converters: Mapping[auto, Type[IAudioRepresentationConverter]] = {
+            AudioRepresentation.RAW: RawAudioRepresentationConverter,
             AudioRepresentation.SPECTROGRAM: SpectrogramAudioRepresentationConverter,
             AudioRepresentation.MFCC: MFCCAudioRepresentationConverter,
         }
