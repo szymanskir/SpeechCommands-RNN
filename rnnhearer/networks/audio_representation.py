@@ -32,11 +32,7 @@ class SpectrogramAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
         self, audio_samples: List[Tuple[np.ndarray, int]]
     ) -> List[np.ndarray]:
-        sr = 8000
-        return [
-            spectrogram(x=resample(audio_sample[1], sr))[2]
-            for audio_sample in audio_samples
-        ]
+        return [spectrogram(audio_sample[1])[2] for audio_sample in audio_samples]
 
 
 class MFCCAudioRepresentationConverter(IAudioRepresentationConverter):
