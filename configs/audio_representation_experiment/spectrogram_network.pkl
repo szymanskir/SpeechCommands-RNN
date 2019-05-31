@@ -3,5 +3,6 @@ Name = SPECTROGRAM_LSTM_2_Layer
 UnitsPerLayer = 256,256
 SignalRepresentation = SPECTROGRAM
 DropoutProbabilities = 0,0
+RecurrentDropoutProbabilities = 0,0
 EpochsCount = 5
 BatchSize = 512
