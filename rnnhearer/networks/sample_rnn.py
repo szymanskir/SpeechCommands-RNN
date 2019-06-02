@@ -42,6 +42,9 @@ def create_network_from_config(
             return_sequences=should_return_sequence[layer_num],
         )
         model.add(layer)
+
+    for dense_layer_units in network_configuration.extra_dense_layers:
+        model.add(layers.Dense(dense_layer_units, activation="relu"))
     model.add(layers.Dense(num_classes, activation="softmax"))
 
     return model
