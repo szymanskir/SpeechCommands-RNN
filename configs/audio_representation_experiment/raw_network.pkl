@@ -1,0 +1,7 @@
+[DEFAULT]
+Name = RAW_LSTM_2_Layer
+UnitsPerLayer = 256,256
+SignalRepresentation = RAW
+DropoutProbabilities = 0,0
+EpochsCount = 5
+BatchSize = 512
