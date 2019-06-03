@@ -11,6 +11,7 @@ class NetworkConfiguration:
     units_per_layer: List[int]
     representation: AudioRepresentation
     dropout_probabilities: List[float]
+    recurrent_dropout_probabilities: List[float]
     epochs_count: int
     batch_size: int
 
@@ -23,6 +24,9 @@ class NetworkConfiguration:
         dropout_probabilities = [
             float(prob) for prob in config["DropoutProbabilities"].split(",")
         ]
+        recurrent_dropout_probabilities = [
+            float(prob) for prob in config["RecurrentDropoutProbabilities"].split(",")
+        ]
         epochs_count = config.getint("EpochsCount")
         batch_size = config.getint("BatchSize")
 
@@ -31,6 +35,7 @@ class NetworkConfiguration:
             units_per_layer,
             representation,
             dropout_probabilities,
+            recurrent_dropout_probabilities,
             epochs_count,
             batch_size,
         )
