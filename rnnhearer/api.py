@@ -58,8 +58,14 @@ def train_inner(input_config: str, data_dir: str, output: str):
 
     logging.info("Creating model...")
 
+    background_samples = DataReader.find_all_wav_files(
+        join(data_dir, "audio", "_background_noise_")
+    )
     generator = AudioDataGenerator(
-        network_config.representation, kept_labels=list(main_labels)
+        network_config.representation,
+        kept_labels=list(main_labels),
+        sample_rate=16000,
+        background_samples=background_samples,
     )
 
     model = create_network_from_config(

@@ -15,7 +15,8 @@ class AudioDataGenerator:
         self,
         audio_representation: AudioRepresentation,
         kept_labels: List[str],
-        sample_rate: int = 16000,
+        sample_rate: int,
+        background_samples: List[Path],
     ):
         self._converter = AudioRepresentationConverterFactory.create_converter(
             audio_representation
@@ -24,6 +25,7 @@ class AudioDataGenerator:
         self._num_classes = len(kept_labels)
         self._encoder.fit(kept_labels)
         self._sample_rate = sample_rate
+        self._background_samples = background_samples
 
     def _read_wavfile(self, sample_filepath):
         file_data = wavfile.read(sample_filepath)
@@ -39,6 +41,14 @@ class AudioDataGenerator:
     def _preprocess(self, audio: np.ndarray) -> np.ndarray:
         audio = amplitude_scaling(audio)
         audio = shift_audio(audio)
+
+        if np.random.uniform(0.0, 1.0) < 0.5:
+            bg_file = self._background_samples[
+                np.random.randint(len(self._background_samples))
+            ]
+            bg_audio = self._read_wavfile(bg_file)
+            add_background_noises(audio, bg_audio, self._sample_rate)
+
         audio = trim_pad_audio(audio, self._sample_rate)
 
         return audio
@@ -114,6 +124,16 @@ def shift_audio(audio, ms_shift=100):
     audio = np.roll(audio, time_shift_dist)
 
     return audio
+
+
+def add_background_noises(audio, background_wav, sample_rate, volume_range=0.1):
+    bg_audio = background_wav
+    bg_audio_start_idx = np.random.randint(bg_audio.shape[0])
+    bg_audio_slice = bg_audio[
+        bg_audio_start_idx : bg_audio_start_idx + sample_rate
+    ] * np.random.uniform(0, volume_range)
+    bg_audio_slice = trim_pad_audio(bg_audio_slice, sample_rate)
+    return audio + bg_audio_slice
 
 
 def history_to_df(history: History) -> pd.DataFrame:

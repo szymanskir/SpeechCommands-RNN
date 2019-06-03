@@ -86,7 +86,7 @@ class DataReader:
         val_samples: List[Tuple[Path, str]] = list()
         for directory in word_samples_dir:
             _LOGGER.info(f"Reading samples from {directory}...")
-            word_audio_samples = self._find_all_wav_files(
+            word_audio_samples = self.find_all_wav_files(
                 join(self._audio_source, directory)
             )
             label = basename(directory)
@@ -107,5 +107,5 @@ class DataReader:
         return train_samples, val_samples
 
     @staticmethod
-    def _find_all_wav_files(dir: str):
+    def find_all_wav_files(dir: str):
         return list(Path(dir).glob("*.wav"))
