@@ -42,12 +42,12 @@ class AudioDataGenerator:
         audio = amplitude_scaling(audio)
         audio = shift_audio(audio)
 
-        if np.random.uniform(0.0, 1.0) < 0.5:
-            bg_file = self._background_samples[
-                np.random.randint(len(self._background_samples))
-            ]
-            bg_audio = self._read_wavfile(bg_file)
-            add_background_noises(audio, bg_audio, self._sample_rate)
+        # if np.random.uniform(0.0, 1.0) < 0.5:
+        #     bg_file = self._background_samples[
+        #         np.random.randint(len(self._background_samples))
+        #     ]
+        #     bg_audio = self._read_wavfile(bg_file)
+        #     add_background_noises(audio, bg_audio, self._sample_rate)
 
         audio = trim_pad_audio(audio, self._sample_rate)
 

@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "args": [
                 "train",
-                "configs/test_config.ini",
+                "configs/audio_representation_experiment/mfcc_network.ini",
                 "--data_dir",
                 "data/train"
             ]
