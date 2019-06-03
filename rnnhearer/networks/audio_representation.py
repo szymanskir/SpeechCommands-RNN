@@ -16,31 +16,31 @@ class AudioRepresentation(StrEnum):
 class IAudioRepresentationConverter(metaclass=ABCMeta):
     @abstractmethod
     def convert_audio_signal(
-        self, audio_samples: List[Tuple[int, np.ndarray]]
+        self, audio_samples: List[np.ndarray], sample_rate: int
     ) -> List[np.ndarray]:
         raise NotImplementedError("subclasses must override foo()!")
 
 
 class RawAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
-        self, audio_samples: List[Tuple[int, np.ndarray]]
+        self, audio_samples: List[np.ndarray], sample_rate: int
     ) -> List[np.ndarray]:
-        return [np.atleast_2d(audio_sample[1]) for audio_sample in audio_samples]
+        return [np.atleast_2d(audio_sample) for audio_sample in audio_samples]
 
 
 class SpectrogramAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
-        self, audio_samples: List[Tuple[int, np.ndarray]]
+        self, audio_samples: List[np.ndarray], sample_rate: int
     ) -> List[np.ndarray]:
-        return [spectrogram(audio_sample[1])[2] for audio_sample in audio_samples]
+        return [spectrogram(audio_sample)[2] for audio_sample in audio_samples]
 
 
 class MFCCAudioRepresentationConverter(IAudioRepresentationConverter):
     def convert_audio_signal(
-        self, audio_samples: List[Tuple[int, np.ndarray]]
+        self, audio_samples: List[np.ndarray], sample_rate: int
     ) -> List[np.ndarray]:
         return [
-            mfcc(signal=audio_sample[1], samplerate=audio_sample[0])
+            mfcc(signal=audio_sample, samplerate=sample_rate)
             for audio_sample in audio_samples
         ]
 
