@@ -3,6 +3,8 @@ from os import listdir
 from os.path import isdir, join, basename
 from pathlib import Path
 from typing import List, Tuple, Set
+from collections import defaultdict
+import random
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,7 +72,7 @@ class DataReader:
             )
 
     def read(
-        self, recognized_labels: Set[str]
+        self, recognized_labels: Set[str], unknown_percentage: float = 0.1
     ) -> Tuple[List[Tuple[Path, str]], List[Tuple[Path, str]]]:
         word_samples_dir = list(
             filter(
@@ -104,7 +106,28 @@ class DataReader:
                 else:
                     val_samples.append(sample)
 
-        return train_samples, val_samples
+        samples_by_label = defaultdict(list)
+        for path, label in train_samples:
+            samples_by_label[label].append((path, label))
+
+        not_unknown_count = sum(
+            [
+                len(samples)
+                for label, samples in samples_by_label.items()
+                if label != "unknown"
+            ]
+        )
+        unknown_count = len(samples_by_label["unknown"])
+
+        samples_by_label["unknown"] = random.sample(
+            samples_by_label["unknown"], int(unknown_percentage * not_unknown_count)
+        )
+
+        rebalanced_train_samples = [
+            item for sublist in samples_by_label.values() for item in sublist
+        ]
+
+        return rebalanced_train_samples, val_samples
 
     @staticmethod
     def find_all_wav_files(dir: str):
