@@ -6,7 +6,7 @@ from keras.utils import to_categorical
 from pathlib import Path
 from sklearn.preprocessing import LabelEncoder
 from typing import List, Tuple, Set
-
+import random
 from .networks import AudioRepresentation, AudioRepresentationConverterFactory
 
 
@@ -45,6 +45,7 @@ class AudioDataGenerator:
         return converted_sample.shape
 
     def flow(self, samples: List[Tuple[Path, str]], batch_size: int):
+        random.shuffle(samples)
         while True:
             for chunk in chunks(samples, batch_size):
                 files = [self._read_wavfile(path) for path, _ in chunk]
@@ -57,6 +58,7 @@ class AudioDataGenerator:
                 yield X, y
 
     def flow_in_memory(self, samples: List[Tuple[Path, str]], batch_size: int):
+        random.shuffle(samples)
         data = []
         for chunk in chunks(samples, batch_size):
             files = [self._read_wavfile(path) for path, _ in chunk]
@@ -88,4 +90,4 @@ def history_to_df(history: History) -> pd.DataFrame:
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
-        yield l[i: i + n]
+        yield l[i : i + n]
