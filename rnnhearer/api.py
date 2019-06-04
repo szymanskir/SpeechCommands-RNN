@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from .data_reader import DataReader
 from .data_manipulation import AudioDataGenerator
-from .networks import NetworkConfiguration, create_network_from_config
+from .networks import (
+    NetworkConfiguration,
+    create_lstm_network_from_config,
+    create_cnn_network_from_config,
+)
 from .utils import read_config, read_pickle, write_pickle
 from .visualization import (
     plot_loss,
@@ -62,13 +66,13 @@ def train_inner(input_config: str, data_dir: str, output: str):
         network_config.representation, kept_labels=list(main_labels)
     )
 
-    model = create_network_from_config(
+    model = create_cnn_network_from_config(
         network_configuration=network_config,
         input_shape=generator.get_data_shape(sample_filepath=train_data[0][0]),
         num_classes=num_classes,
     )
     model.compile(
-        optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"]
+        loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"]
     )
 
     history = model.fit_generator(

@@ -1,6 +1,16 @@
 from keras import models, layers
 from typing import Tuple
 from .network_configuration import NetworkConfiguration
+from keras.layers import (
+    Conv1D,
+    BatchNormalization,
+    MaxPooling1D,
+    Dense,
+    Activation,
+    Dropout,
+    GlobalAveragePooling1D,
+    GlobalMaxPooling1D,
+)
 
 
 def create_sample_rnn(input_shape: Tuple[int], num_classes):
@@ -11,7 +21,7 @@ def create_sample_rnn(input_shape: Tuple[int], num_classes):
     return model
 
 
-def create_network_from_config(
+def create_lstm_network_from_config(
     network_configuration: NetworkConfiguration,
     input_shape: Tuple[int],
     num_classes: int,
@@ -43,5 +53,31 @@ def create_network_from_config(
         )
         model.add(layer)
     model.add(layers.Dense(num_classes, activation="softmax"))
+
+    return model
+
+
+def create_cnn_network_from_config(
+    network_configuration: NetworkConfiguration,
+    input_shape: Tuple[int],
+    num_classes: int,
+):
+    model = models.Sequential()
+    model.add(Conv1D(16, kernel_size=3, padding="same", input_shape=input_shape))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(2, padding="same"))
+    for i in range(1, 8):
+        model.add(Conv1D(16 * (2 ** i), kernel_size=3, padding="same"))
+        model.add(BatchNormalization())
+        model.add(Activation("relu"))
+        model.add(MaxPooling1D(2, padding="same"))
+
+    # model.add(GlobalAveragePooling1D())
+    model.add(GlobalMaxPooling1D())
+
+    model.add(Dense(1024, activation="relu"))
+    model.add(Dropout(0.2))
+    model.add(Dense(num_classes, activation="softmax"))
 
     return model
