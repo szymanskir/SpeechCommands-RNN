@@ -113,4 +113,5 @@ def plot_confusion_matrix(y_score: np.ndarray, y_test: np.ndarray, labels: List[
     confm = confusion_matrix(y_test.argmax(axis=1), y_score.argmax(axis=1))
     df_cm = pd.DataFrame(confm, index=labels, columns=labels)
 
-    return sns.heatmap(df_cm, cmap="Oranges", annot=True)
+    sns.heatmap(df_cm, cmap="Oranges", annot=True, fmt="d")
+    plt.show()
