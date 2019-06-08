@@ -10,6 +10,7 @@ class NetworkConfiguration:
     name: str
     units_per_layer: List[int]
     representation: AudioRepresentation
+    conv_layers_count: int
     dropout_probabilities: List[float]
     recurrent_dropout_probabilities: List[float]
     epochs_count: int
@@ -21,6 +22,11 @@ class NetworkConfiguration:
         name = config.get("Name")
         units_per_layer = [int(units) for units in config["UnitsPerLayer"].split(",")]
         representation = AudioRepresentation(config["SignalRepresentation"])
+        conv_layers_count = (
+            int(config["ConvLayersCount"])
+            if config_parser.has_option("DEFAULT", "ConvLayersCount")
+            else 0
+        )
         dropout_probabilities = [
             float(prob) for prob in config["DropoutProbabilities"].split(",")
         ]
@@ -34,6 +40,7 @@ class NetworkConfiguration:
             name,
             units_per_layer,
             representation,
+            conv_layers_count,
             dropout_probabilities,
             recurrent_dropout_probabilities,
             epochs_count,

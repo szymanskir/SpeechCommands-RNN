@@ -58,9 +58,7 @@ def train_inner(input_config: str, data_dir: str, output: str):
 
     logging.info("Creating model...")
 
-    generator = AudioDataGenerator(
-        network_config.representation, kept_labels=list(main_labels)
-    )
+    generator = AudioDataGenerator(network_config, kept_labels=list(main_labels))
 
     model = create_network_from_config(
         network_configuration=network_config,
