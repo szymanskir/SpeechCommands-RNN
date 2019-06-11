@@ -7,16 +7,21 @@ from pathlib import Path
 from sklearn.preprocessing import LabelEncoder
 from typing import List, Tuple, Set
 import random
-from .networks import AudioRepresentation, AudioRepresentationConverterFactory
+from .networks import (
+    AudioRepresentation,
+    AudioRepresentationConverterFactory,
+    NetworkConfiguration,
+)
 
 
 class AudioDataGenerator:
     def __init__(
-        self, audio_representation: AudioRepresentation, kept_labels: List[str]
+        self, network_configuration: NetworkConfiguration, kept_labels: List[str]
     ):
         self._converter = AudioRepresentationConverterFactory.create_converter(
-            audio_representation
+            network_configuration.representation
         )
+        self._should_be_reshaped = network_configuration.conv_layers_count > 0
         self._encoder = LabelEncoder()
         self._num_classes = len(kept_labels)
         self._encoder.fit(kept_labels)
@@ -51,6 +56,10 @@ class AudioDataGenerator:
                 files = [self._read_wavfile(path) for path, _ in chunk]
 
                 converted = self._converter.convert_audio_signal(files)
+                if self._should_be_reshaped:
+                    converted = [
+                        x.reshape(x.shape[0], x.shape[1], 1) for x in converted
+                    ]
                 labels = [label for _, label in chunk]
                 X = np.concatenate([converted])
                 y = to_categorical(self._encoder.transform(labels), self._num_classes)
@@ -64,6 +73,8 @@ class AudioDataGenerator:
             files = [self._read_wavfile(path) for path, _ in chunk]
 
             converted = self._converter.convert_audio_signal(files)
+            if self._should_be_reshaped:
+                converted = [x.reshape(x.shape[0], x.shape[1], 1) for x in converted]
             labels = [label for _, label in chunk]
             data.append(
                 (

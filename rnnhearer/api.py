@@ -58,9 +58,7 @@ def train_inner(input_config: str, data_dir: str, output: str):
 
     logging.info("Creating model...")
 
-    generator = AudioDataGenerator(
-        network_config.representation, kept_labels=list(main_labels)
-    )
+    generator = AudioDataGenerator(network_config, kept_labels=list(main_labels))
 
     model = create_network_from_config(
         network_configuration=network_config,
@@ -82,6 +80,12 @@ def train_inner(input_config: str, data_dir: str, output: str):
         ),
         validation_steps=len(validation_data) / network_config.batch_size,
     )
+
+    validation_dataset_generator = generator.flow_in_memory(
+        samples=validation_data, batch_size=len(validation_data)
+    )
+    validation_dataset = next(validation_dataset_generator)
+    history.validation_data = validation_dataset
 
     if output:
         write_pickle(history, output)
@@ -111,7 +115,7 @@ def visualize_inner(
     history_files = list(Path(histories_dir).glob("*.pkl"))
     histories = [read_pickle(history_file) for history_file in history_files]
 
-    main_labels = [
+    main_labels = {
         "yes",
         "no",
         "up",
@@ -123,21 +127,25 @@ def visualize_inner(
         "stop",
         "go",
         "unknown",
-    ]
+    }
 
     if loss:
         plot_loss(histories)
+        plt.show()
     if acc:
         plot_accuracy(histories)
+        plt.show()
     if roc_auc:
         for history in histories:
             y_scores = history.model.predict(history.validation_data[0])
             y_test = history.validation_data[1]
-            plot_roc_curves(y_score=y_scores, y_test=y_test, labels=main_labels)
+            breakpoint()
+            plot_roc_curves(y_score=y_scores, y_test=y_test, labels=list(main_labels))
     if confusion_matrix:
         for history in histories:
             y_scores = history.model.predict(history.validation_data[0])
             y_test = history.validation_data[1]
-            plot_confusion_matrix(y_score=y_scores, y_test=y_test, labels=main_labels)
+            plot_confusion_matrix(
+                y_score=y_scores, y_test=y_test, labels=list(main_labels)
+            )
 
-    plt.show()

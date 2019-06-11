@@ -20,15 +20,8 @@ def plot_accuracy(histories: List[History]):
         var_name="acc_type",
         value_name="acc",
     )
-    accuracy_plot = sns.FacetGrid(data=histories_df, col="model_name")
-    accuracy_plot = accuracy_plot.map(
-        sns.lineplot,
-        x="index",
-        y="acc",
-        hue="acc_type",
-        style="acc_type",
-        data=histories_df,
-    )
+    accuracy_plot = sns.FacetGrid(data=histories_df, col="model_name", hue="acc_type")
+    accuracy_plot = accuracy_plot.map(plt.plot, "index", "acc")
 
     accuracy_plot.add_legend()
     return accuracy_plot
@@ -43,15 +36,8 @@ def plot_loss(histories: List[History]):
         var_name="loss_type",
         value_name="loss",
     )
-    loss_plot = sns.FacetGrid(data=histories_df, col="model_name")
-    loss_plot = loss_plot.map(
-        sns.lineplot,
-        x="index",
-        y="loss",
-        hue="loss_type",
-        style="loss_type",
-        data=histories_df,
-    )
+    loss_plot = sns.FacetGrid(data=histories_df, col="model_name", hue="loss_type")
+    loss_plot = loss_plot.map(plt.plot, "index", "loss")
 
     loss_plot.add_legend()
     return loss_plot
@@ -113,4 +99,5 @@ def plot_confusion_matrix(y_score: np.ndarray, y_test: np.ndarray, labels: List[
     confm = confusion_matrix(y_test.argmax(axis=1), y_score.argmax(axis=1))
     df_cm = pd.DataFrame(confm, index=labels, columns=labels)
 
-    return sns.heatmap(df_cm, cmap="Oranges", annot=True)
+    sns.heatmap(df_cm, cmap="Oranges", annot=True, fmt="d")
+    plt.show()
