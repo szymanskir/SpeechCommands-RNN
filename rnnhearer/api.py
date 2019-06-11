@@ -115,7 +115,7 @@ def visualize_inner(
     history_files = list(Path(histories_dir).glob("*.pkl"))
     histories = [read_pickle(history_file) for history_file in history_files]
 
-    main_labels = [
+    main_labels = {
         "yes",
         "no",
         "up",
@@ -127,7 +127,7 @@ def visualize_inner(
         "stop",
         "go",
         "unknown",
-    ]
+    }
 
     if loss:
         plot_loss(histories)
@@ -139,10 +139,13 @@ def visualize_inner(
         for history in histories:
             y_scores = history.model.predict(history.validation_data[0])
             y_test = history.validation_data[1]
-            plot_roc_curves(y_score=y_scores, y_test=y_test, labels=main_labels)
+            breakpoint()
+            plot_roc_curves(y_score=y_scores, y_test=y_test, labels=list(main_labels))
     if confusion_matrix:
         for history in histories:
             y_scores = history.model.predict(history.validation_data[0])
             y_test = history.validation_data[1]
-            plot_confusion_matrix(y_score=y_scores, y_test=y_test, labels=main_labels)
+            plot_confusion_matrix(
+                y_score=y_scores, y_test=y_test, labels=list(main_labels)
+            )
 
