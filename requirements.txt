@@ -61,7 +61,7 @@ StrEnum==0.4.0
 tensorboard==1.13.1
 tensorflow==1.13.1
 tensorflow-estimator==1.13.0
-tensorflow-gpu==1.13.1
+tensorflow-gpu==1.15.2
 termcolor==1.1.0
 text-unidecode==1.2
 toml==0.10.0
